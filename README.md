@@ -36,21 +36,21 @@ This document is the description of work for ATN_Auto
 ```shell
 $ sudo pip3 install virtualenv
 $ cd ~
-$ virtualenv atn_auto
+$ virtualenv atn_env
 ```
 
 # 3 Cloning & Executing Instructions
 ```shell
-$ source ~/atn_auto/bin/activate # activate virtual environment
-(atn_auto) $ pip list # should be very few packages shown here
-(atn_auto) $ cd ~/workspace
-(atn_auto) $ git clone https://github.com/EnzeXu/ATN_Auto.git
-(atn_auto) $ cd ATN_Auto
-(atn_auto) $ tar jxvf data/atn_data_x_n.tar.bz2 -C data # IMPORTANT
-(atn_auto) $ pip install -r requirements.txt
-(atn_auto) $ python3 auto.py 1 test # python auto.py [times_of_loop] [any_comments]
+$ source ~/atn_env/bin/activate # activate virtual environment
+(atn_env) $ pip list # should be very few packages shown here
+(atn_env) $ cd ~/workspace
+(atn_env) $ git clone https://github.com/EnzeXu/ATN_Auto.git
+(atn_env) $ cd ATN_Auto
+(atn_env) $ tar jxvf data/atn_data_x_n.tar.bz2 -C data # IMPORTANT
+(atn_env) $ pip install -r requirements.txt
+(atn_env) $ python3 auto.py 1 test # python auto.py [times_of_loop] [any_comments]
 # It is normal to see huge warnings at this step, but don't worry.
 # after it finishes (may cost several minutes)
-(atn_auto) $ cat record/record.csv
-(atn_auto) $ deactivate
+(atn_env) $ cat record/record.csv
+(atn_env) $ deactivate
 ```
