@@ -1,2 +1,2 @@
-Id,Distribution_string,Success,Cluster_std(thres=60),MMSE_var(thres=40),CDRSB_var(thres=20),CDRSB_var(thres=360),comments
+Id,Success,Distribution_string,Cluster_std(thres=60),MMSE_var(thres=40),CDRSB_var(thres=20),ADAS_var(thres=360),comments,K,h_dim_FC,h_dim_RNN,num_layer_encoder,num_layer_selector,num_layer_predictor,lr_rate,keep_prob_s3,mb_size_s3,iteration_s3,check_step_s3,alpha,beta,mb_size_s4,keep_prob_s4,lr_rate1,lr_rate2,iteration_s6,check_step_s6,iteration_s7,check_step_s7
 

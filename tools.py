@@ -252,18 +252,20 @@ def judge_good_train(labels, heat_map_data):
     return judge, params, distribution_string
 
 
-def save_record(main_path, index, distribution_string, judge, params, comments):
+def save_record(main_path, index, distribution_string, judge, judge_params, comments, params):
     with open(main_path + "/record/record.csv", "a") as f:
-        f.write("{},{},{},{},{},{},{},{}\n".format(
+        f.write("{},{},{},{},{},{},{},{},".format(
             index,
             judge,
             distribution_string,
-            params.get("Cluster_std"),
-            params.get("MMSE_var"),
-            params.get("CDRSB_var"),
-            params.get("ADAS_var"),
+            judge_params.get("Cluster_std"),
+            judge_params.get("MMSE_var"),
+            judge_params.get("CDRSB_var"),
+            judge_params.get("ADAS_var"),
             comments
         ))
+        f.write(",".join([str(params.get(one_key)) for one_key in list(params.keys())]))
+        f.write("\n")
 
 
 if __name__ == "__main__":
