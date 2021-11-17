@@ -36,7 +36,7 @@ from class_AC_TPC import AC_TPC, initialize_embedding
 from tools import *
 
 
-def train(main_path, data_name, print_flag=True):
+def train(main_path, data_name, parameters, print_flag=True):
     enze_patient_data = np.load(main_path + "data/enze_patient_data_n.npy", allow_pickle=True)
     enze_patient_data = np.asarray(enze_patient_data)
     # labels = build_labels(main_path, enze_patient_data)
@@ -60,14 +60,14 @@ def train(main_path, data_name, print_flag=True):
     if print_flag:
         print("[{:0>4d}][Step 2] Define network parameters".format(data_name))
     # DEFINE NETWORK PARAMETERS
-    K = 5  # 5
-    h_dim_FC = 26  # for fully_connected layers
-    h_dim_RNN = 26
+    K = parameters.get("K")  # 5  # 5
+    h_dim_FC = parameters.get("h_dim_FC")  # 26  # for fully_connected layers
+    h_dim_RNN = parameters.get("h_dim_RNN")  # 26
     x_dim = np.shape(data_x)[2]
     y_dim = np.shape(data_y)[2]
-    num_layer_encoder = 2
-    num_layer_selector = 3
-    num_layer_predictor = 2
+    num_layer_encoder = parameters.get("num_layer_encoder")  # 2
+    num_layer_selector = parameters.get("num_layer_selector")  # 3
+    num_layer_predictor = parameters.get("num_layer_predictor")  # 2
     z_dim = h_dim_RNN * num_layer_encoder
     max_length = np.shape(data_x)[1]
     rnn_type = 'LSTM'  # GRU, LSTM
@@ -93,12 +93,12 @@ def train(main_path, data_name, print_flag=True):
     # TRAIN -- INITIALIZE NETWORK
     if print_flag:
         print("[{:0>4d}][Step 3] Initialize network".format(data_name))
-    lr_rate = 0.0001  # 0.0001
-    keep_prob = 0.5  # 0.5
-    mb_size = 32  # 128 # 32
+    lr_rate = parameters.get("lr_rate")  # 0.0001  # 0.0001
+    keep_prob = parameters.get("keep_prob_s3")  # 0.5  # 0.5
+    mb_size = parameters.get("mb_size_s3")  # 32  # 128 # 32
     # data_name = '10'
-    ITERATION = 1000  # 3750
-    check_step = 250  # 250
+    ITERATION = parameters.get("iteration_s3")  # 1000  # 3750
+    check_step = parameters.get("check_step_s3")  # 250  # 250
     save_path = main_path + 'saves/{}/proposed/init/'.format(data_name)  # ENZE updated
     if not os.path.exists(save_path + '/models/'):
         os.makedirs(save_path + '/models/')
@@ -121,7 +121,7 @@ def train(main_path, data_name, print_flag=True):
             y_true = va_data_y.reshape([-1, y_dim])[tmp_m.reshape([-1]) == 1]
             val_loss = np.sum((y_true - y_pred) ** 2, axis=-1)
             avg_val_loss = np.mean(val_loss)
-            #### print("ITR {:05d}: loss_train={:.3f} loss_val={:.3f}".format(itr + 1, avg_loss, avg_val_loss))
+            print("ITR {:05d}: loss_train={:.3f} loss_val={:.3f}".format(itr + 1, avg_loss, avg_val_loss))
             avg_loss = 0
     saver.save(sess, save_path + 'models/model_K{}'.format(K))
     save_logging(network_settings, save_path + 'models/network_settings_K{}.txt'.format(K))
@@ -129,13 +129,13 @@ def train(main_path, data_name, print_flag=True):
     # TRAIN TEMPORAL PHENOTYPING
     if print_flag:
         print("[{:0>4d}][Step 4] Train temporal phenotyping".format(data_name))
-    alpha = 0.00001  # 0.00001
-    beta = 1  # 1
-    mb_size = 8  # 128#8
+    alpha = parameters.get("alpha")  # 0.001  # 0.00001
+    beta = parameters.get("beta")  # 1  # 1
+    mb_size = parameters.get("mb_size_s4")  # 8  # 128#8
     M = int(tr_data_x.shape[0] / mb_size)  # for main algorithm
-    keep_prob = 0.7
-    lr_rate1 = 0.0001  # 0.0001
-    lr_rate2 = 0.0001  # 0.0001
+    keep_prob = parameters.get("keep_prob_s4")  # 0.7
+    lr_rate1 = parameters.get("lr_rate1")  # 0.0001  # 0.0001
+    lr_rate2 = parameters.get("lr_rate2")  # 0.0001  # 0.0001
     save_path = main_path + 'saves/{}/proposed/trained/'.format(data_name)  # ENZE updated
     if not os.path.exists(save_path + '/models/'):
         os.makedirs(save_path + '/models/')
@@ -165,15 +165,15 @@ def train(main_path, data_name, print_flag=True):
     e = np.arctanh(e)
     sess.run(model.EE.initializer, feed_dict={model.E: e})  # model.EE = tf.nn.tanh(model.E)
     # update selector wrt initial classes
-    ITERATION = 15000
-    check_step = 1000
+    ITERATION = parameters.get("iteration_s6")  # 8000
+    check_step = parameters.get("check_step_s6")  # 1000
     avg_loss_s = 0
     for itr in range(ITERATION):
         z_mb, s_mb = f_get_minibatch(mb_size, tmp_z, s_init)
         _, tmp_loss_s = model.train_selector(z_mb, s_mb, lr_rate1, k_prob=keep_prob)
         avg_loss_s += tmp_loss_s / check_step
         if (itr + 1) % check_step == 0:
-            #### print("ITR:{:04d} | Loss_s:{:.4f}".format(itr + 1, avg_loss_s))
+            print("ITR:{:04d} | Loss_s:{:.4f}".format(itr + 1, avg_loss_s))
             avg_loss_s = 0
     tmp_ybars = model.predict_yy(np.tanh(e))
     new_e = np.copy(e)
@@ -181,8 +181,8 @@ def train(main_path, data_name, print_flag=True):
     if print_flag:
         print("[{:0>4d}][Step 7] Training main algorithm".format(data_name))
     # TRAINING MAIN ALGORITHM
-    ITERATION = 100  # 5000
-    check_step = 100
+    ITERATION = parameters.get("iteration_s7")  # 500  # 5000
+    check_step = parameters.get("check_step_s7")  # 100
     avg_loss_c_L1 = 0
     avg_loss_a_L1 = 0
     avg_loss_a_L2 = 0
@@ -268,28 +268,57 @@ def train(main_path, data_name, print_flag=True):
                  "'num_layer_predictor': {},\n" \
                  "# [Step 3] Initialize network\n" \
                  "'lr_rate': {},\n" \
+                 "'keep_prob_s3': {},\n"\
+                 "'mb_size_s3': {},\n" \
+                 "'iteration_s3': {},\n" \
+                 "'check_step_s3': {},\n" \
                  "# [Step 4] Train temporal phenotyping\n" \
                  "'alpha': {},\n" \
                  "'beta': {},\n" \
+                 "'mb_size_s4': {},\n" \
+                 "'keep_prob_s4': {},\n" \
                  "'lr_rate1': {},\n" \
-                 "'lr_rate2': {},\n".format(
-            K, h_dim_FC, h_dim_RNN,
-            num_layer_encoder,
-            num_layer_selector,
-            num_layer_predictor,
-            lr_rate,
-            alpha,
-            beta,
-            lr_rate1,
-            lr_rate2,
+                 "'lr_rate2': {},\n" \
+                 "# [Step 6] Initializing embedding & selector\n" \
+                 "'iteration_s6': {},\n" \
+                 "'check_step_s6': {},\n" \
+                 "# [Step 7] Training main algorithm\n" \
+                 "'iteration_s7': {},\n" \
+                 "'check_step_s7': {}\n".format(
+            # [Step 2] Define network parameters
+            parameters.get("K"),
+            parameters.get("h_dim_FC"),
+            parameters.get("h_dim_RNN"),
+            parameters.get("num_layer_encoder"),
+            parameters.get("num_layer_selector"),
+            parameters.get("num_layer_predictor"),
+            # [Step 3] Initialize network
+            parameters.get("lr_rate"),
+            parameters.get("keep_prob_s3"),
+            parameters.get("mb_size_s3"),
+            parameters.get("iteration_s3"),
+            parameters.get("check_step_s3"),
+            # [Step 4] Train temporal phenotyping
+            parameters.get("alpha"),
+            parameters.get("beta"),
+            parameters.get("mb_size_s4"),
+            parameters.get("keep_prob_s4"),
+            parameters.get("lr_rate1"),
+            parameters.get("lr_rate2"),
+            # [Step 6] Initializing embedding & selector
+            parameters.get("iteration_s6"),
+            parameters.get("check_step_s6"),
+            # [Step 7] Training main algorithm
+            parameters.get("iteration_s7"),
+            parameters.get("check_step_s7")
         )
         f.write(string)
 
     heat_map_data = get_heat_map_data(5, enze_patient_data, patientProgressions, main_path + 'data/MRI_information_All_Measurement.xlsx')
     # print(enze_patient_data)
     # print(heat_map_data)
-    judge, params, distribution_string = judge_good_train(patientProgressions, heat_map_data)
-    return judge, params, distribution_string
+    judge, judge_params, distribution_string = judge_good_train(patientProgressions, heat_map_data)
+    return judge, judge_params, distribution_string
 
 
 if __name__ == "__main__":
@@ -301,10 +330,38 @@ if __name__ == "__main__":
         comments = platform.platform() + ": " + sys.argv[1]
     else:
         comments = platform.platform()
+    params = {
+        # [Step 2] Define network parameters
+        'K': 5,
+        'h_dim_FC': 8,
+        'h_dim_RNN': 8,
+        'num_layer_encoder': 2,
+        'num_layer_selector': 3,
+        'num_layer_predictor': 2,
+        # [Step 3] Initialize network
+        'lr_rate': 0.0001,
+        'keep_prob_s3': 0.5,
+        'mb_size_s3': 32,
+        'iteration_s3': 1000,
+        'check_step_s3': 100,
+        # [Step 4] Train temporal phenotyping
+        'alpha': 0.00001,
+        'beta': 1,
+        'mb_size_s4': 32,
+        'keep_prob_s4': 0.7,
+        'lr_rate1': 0.0001,
+        'lr_rate2': 0.0001,
+        # [Step 6] Initializing embedding & selector
+        'iteration_s6': 15000,
+        'check_step_s6': 1000,
+        # [Step 7] Training main algorithm"
+        'iteration_s7': 1000,
+        'check_step_s7': 100
+    }
     start_index = 1
     for i in range(1000):
-        j, p, ds = train(main_path, start_index + i)
-        save_record(main_path, start_index + i, ds, j, p, comments)
+        j, p, ds = train(main_path, start_index + i, params)
+        save_record(main_path, start_index + i, ds, j, p, comments, params)
 
 
 
