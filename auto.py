@@ -327,7 +327,11 @@ if __name__ == "__main__":
 
     main_path = "/".join(sys.argv[0].split("/")[:-1]) + "/"  # "E:/Workspace_WFU/ATN/Auto/"
     if len(sys.argv) > 1:
-        comments = platform.platform() + ": " + sys.argv[1]
+        times = int(sys.argv[1])
+    else:
+        times = 1000
+    if len(sys.argv) > 2:
+        comments = platform.platform() + ": " + sys.argv[2]
     else:
         comments = platform.platform()
     params = {
