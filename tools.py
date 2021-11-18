@@ -234,7 +234,7 @@ def judge_good_train(labels, heat_map_data):
         dic[i] = 0
     for row in labels:
         for item in row:
-            dic[item[0]] += 1
+            dic[item if (type(item) == int or type(item) == np.int32) else item[0]] += 1
     distribution = np.asarray([dic.get(i) for i in range(5)])
     distribution_string = "/".join([str(item) for item in distribution])
     param_1 = distribution.std()
@@ -268,9 +268,19 @@ def save_record(main_path, index, distribution_string, judge, judge_params, comm
         f.write("\n")
 
 
+def get_k_means_result(main_path):
+    atn_kmeans_cluster = np.load(main_path + 'data/atn_kmeans_cluster.npy')
+    atn_kmeans_cluster = np.asarray(atn_kmeans_cluster)
+    enze_patient_data = np.load(main_path + "data/enze_patient_data_n.npy", allow_pickle=True)
+    enze_patient_data = np.asarray(enze_patient_data)
+    res1 = get_heat_map_data(5, enze_patient_data, atn_kmeans_cluster, main_path + 'data/MRI_information_All_Measurement.xlsx')
+    judge, params, distribution_string = judge_good_train(atn_kmeans_cluster, res1)
+    print(judge, params, distribution_string)
+
+
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
-    # main_path = "/".join(sys.argv[0].split("/")[:-1]) + "/"
+    main_path = "/".join(sys.argv[0].split("/")[:-1]) + "/"
     # p = {
     #     "Cluster_std": 30,
     #     "MMSE_var": 50,
@@ -278,15 +288,16 @@ if __name__ == "__main__":
     #     "ADAS_var": 40
     # }
     # save_record(main_path, 10, 0, p, "test")
-    data = pd.read_excel("data/MRI_information_All_Measurement.xlsx")
-    target_labels = ["MMSE", "CDRSB", "ADAS13"]
-    data = data[["PTID", "EXAMDATE"] + target_labels]
-    print(data)
-    print(data.dtypes)
-    data["PTID"] = data["PTID"].astype(str)
-    data["EXAMDATE"] = data["EXAMDATE"].astype(str)
-    print(data)
-    print(data.dtypes)
+    get_k_means_result(main_path)
+    # data = pd.read_excel("data/MRI_information_All_Measurement.xlsx")
+    # target_labels = ["MMSE", "CDRSB", "ADAS13"]
+    # data = data[["PTID", "EXAMDATE"] + target_labels]
+    # print(data)
+    # print(data.dtypes)
+    # data["PTID"] = data["PTID"].astype(str)
+    # data["EXAMDATE"] = data["EXAMDATE"].astype(str)
+    # print(data)
+    # print(data.dtypes)
     # print(data.loc[(data["PTID"] == "013_S_2389") & (data["EXAMDATE"] == int("20171130"))]["MMSE"])
     # print(data[(str(data["PTID"]) == "013_S_2389") & (data["EXAMDATE"] == int("20171130"))]["MMSE"])
 
