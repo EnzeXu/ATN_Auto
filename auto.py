@@ -325,7 +325,7 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-    main_path = "/".join(sys.argv[0].split("/")[:-1]) + "/"  # "E:/Workspace_WFU/ATN/Auto/"
+    main_path = os.path.dirname(os.path.abspath("auto.py")) + "/"  # "E:/Workspace_WFU/ATN/Auto/"
     if len(sys.argv) > 1:
         times = int(sys.argv[1])
     else:
