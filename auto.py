@@ -334,6 +334,10 @@ if __name__ == "__main__":
         comments = platform.platform() + ": " + sys.argv[2]
     else:
         comments = platform.platform()
+    if len(sys.argv) > 3:
+        default_start_index = int(sys.argv[3])
+    else:
+        default_start_index = 1
     params = {
         # [Step 2] Define network parameters
         'K': 5,
@@ -362,7 +366,7 @@ if __name__ == "__main__":
         'iteration_s7': 1000,
         'check_step_s7': 100
     }
-    start_index = get_start_index(main_path)
+    start_index = get_start_index(main_path, default_start_index)
     for i in range(times):
         j, p, ds = train(main_path, start_index + i, params)
         save_record(main_path, start_index + i, ds, j, p, comments, params)

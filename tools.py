@@ -278,9 +278,9 @@ def get_k_means_result(main_path):
     print(judge, params, distribution_string)
 
 
-def get_start_index(main_path):
+def get_start_index(main_path, default_start_index):
     df = pd.read_csv(main_path + "record/record.csv")
-    start_index = sorted(list(df["Id"]), key=lambda x: x)[-1] + 1 if len(df) > 0 else 1
+    start_index = sorted(list(df["Id"]), key=lambda x: x)[-1] + 1 if len(df) > 0 else default_start_index
     return start_index
 
 
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     #     "ADAS_var": 40
     # }
     # save_record(main_path, 10, 0, p, "test")
-    print(get_start_index(main_path))
+    print(get_start_index(main_path, 1))
     # data = pd.read_excel("data/MRI_information_All_Measurement.xlsx", engine="openpyxl")
     # target_labels = ["MMSE", "CDRSB", "ADAS13"]
     # data = data[["PTID", "EXAMDATE"] + target_labels]
