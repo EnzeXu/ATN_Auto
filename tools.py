@@ -194,6 +194,7 @@ def draw_heat_map_2(data1, data2, s=2):
     cb.set_ticklabels(["Low", "High"])
     cb.set_label("Intra-cluster variance", fontdict={"rotation": 270})
     plt.tight_layout()
+    plt.show()
 
 
 def get_heat_map_data(K, patient_data, label, data_path):
@@ -228,7 +229,7 @@ def get_heat_map_data(K, patient_data, label, data_path):
     return result
 
 
-def judge_good_train(labels, heat_map_data):
+def judge_good_train(labels, heat_map_data, const_cn_ad_labels):
     dic = dict()
     for i in range(5):
         dic[i] = 0
@@ -236,7 +237,8 @@ def judge_good_train(labels, heat_map_data):
         for item in row:
             dic[item if (type(item) == int or type(item) == np.int32) else item[0]] += 1
     distribution = np.asarray([dic.get(i) for i in range(5)])
-    distribution_string = "/".join([str(item) for item in distribution])
+    label_strings = create_label_string(labels, const_cn_ad_labels)
+    distribution_string = "/".join(["{}({})".format(x, y) for x, y in zip(distribution, label_strings)])
     param_1 = distribution.std()
     three_sums = np.asarray(heat_map_data).sum(axis=0)
     param_2 = three_sums[0]
@@ -275,7 +277,8 @@ def get_k_means_result(main_path):
     enze_patient_data = np.asarray(enze_patient_data)
     res1 = get_heat_map_data(5, enze_patient_data, atn_kmeans_cluster, main_path + 'data/MRI_information_All_Measurement.xlsx')
     judge, params, distribution_string = judge_good_train(atn_kmeans_cluster, res1)
-    print(judge, params, distribution_string)
+    # print(judge, params, distribution_string)
+    return res1
 
 
 def get_start_index(main_path, default_start_index):
@@ -284,9 +287,62 @@ def get_start_index(main_path, default_start_index):
     return start_index
 
 
+def get_ac_tpc_result(main_path, index):
+    labels = np.load(main_path + 'saves/{}/proposed/trained/results/labels.npy'.format(index))
+    enze_patient_data = np.load(main_path + "data/enze_patient_data_n.npy", allow_pickle=True)
+    res = get_heat_map_data(5, enze_patient_data, labels, main_path + 'data/MRI_information_All_Measurement.xlsx')
+    return res
+
+
+def get_cn_ad_labels(main_path, pt_id_list):
+    clinical_score = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx')
+    cn_ad_labels = []
+    dic = dict()
+    for i in range(320):  # [148*148，[label tuple]，VISCODE，patientID]
+        first_scan_label = list(clinical_score[clinical_score["PTID"] == pt_id_list[i]]["DX"])[0]
+        last_scan_label = list(clinical_score[clinical_score["PTID"] == pt_id_list[i]]["DX"])[-1]
+        for scan_label in [first_scan_label, last_scan_label]:
+            if scan_label not in dic:
+                dic[scan_label] = 1
+            else:
+                dic[scan_label] += 1
+        cn_ad_labels.append([first_scan_label, last_scan_label])
+    # print(dic)
+    return np.asarray(cn_ad_labels)
+
+
+def create_label_string(cluster_labels, const_cn_ad_labels):
+    dic_list = []
+    for i in range(5):
+        dic = dict()
+        dic["AD"] = 0
+        dic["CN"] = 0
+        dic["Other"] = 0
+        dic_list.append(dic)
+
+    for i in range(320):
+        for j in range(2):
+            tmp_cluster_id = cluster_labels[i][j] if type(cluster_labels[i][j]) == int else cluster_labels[i][j][0]
+            if const_cn_ad_labels[i][j] == "AD":
+                dic_list[tmp_cluster_id]["AD"] += 1
+            elif const_cn_ad_labels[i][j] == "CN":
+                dic_list[tmp_cluster_id]["CN"] += 1
+            else:
+                dic_list[tmp_cluster_id]["Other"] += 1
+    # for dic in dic_list:
+    #     print(dic)
+    return ["{}+{}+{}".format(dic.get("CN"), dic.get("AD"), dic.get("Other")) for dic in dic_list]
+
+
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     main_path = os.path.dirname(os.path.abspath("__file__")) + "/"
+    enze_patient_data = np.load(main_path + "data/enze_patient_data_n.npy", allow_pickle=True)
+    pt_id_list = [item[0][3] for item in enze_patient_data]
+    # print(pt_id_list)
+    cn_ad_labels = get_cn_ad_labels(main_path, pt_id_list)
+    labels = np.load(main_path + 'saves/{}/proposed/trained/results/labels.npy'.format(1146))
+    print(create_label_string(labels, cn_ad_labels))
     # p = {
     #     "Cluster_std": 30,
     #     "MMSE_var": 50,
@@ -294,7 +350,9 @@ if __name__ == "__main__":
     #     "ADAS_var": 40
     # }
     # save_record(main_path, 10, 0, p, "test")
-    print(get_start_index(main_path, 1))
+    # res1 = get_k_means_result(main_path)
+    # res2 = get_ac_tpc_result(main_path, 1146)
+    # draw_heat_map_2(res1, res2)
     # data = pd.read_excel("data/MRI_information_All_Measurement.xlsx", engine="openpyxl")
     # target_labels = ["MMSE", "CDRSB", "ADAS13"]
     # data = data[["PTID", "EXAMDATE"] + target_labels]

@@ -317,7 +317,9 @@ def train(main_path, data_name, parameters, print_flag=True):
     heat_map_data = get_heat_map_data(5, enze_patient_data, patientProgressions, main_path + 'data/MRI_information_All_Measurement.xlsx')
     # print(enze_patient_data)
     # print(heat_map_data)
-    judge, judge_params, distribution_string = judge_good_train(patientProgressions, heat_map_data)
+    pt_id_list = [item[0][3] for item in enze_patient_data]
+    cn_ad_labels = get_cn_ad_labels(main_path, pt_id_list)
+    judge, judge_params, distribution_string = judge_good_train(patientProgressions, heat_map_data, cn_ad_labels)
     return judge, judge_params, distribution_string
 
 
@@ -340,31 +342,31 @@ if __name__ == "__main__":
         default_start_index = 1
     params = {
         # [Step 2] Define network parameters
-        'K': 5,
-        'h_dim_FC': 8,
-        'h_dim_RNN': 8,
-        'num_layer_encoder': 2,
-        'num_layer_selector': 3,
-        'num_layer_predictor': 2,
+        'K': 5,                     # 5
+        'h_dim_FC': 8,              # 26
+        'h_dim_RNN': 8,             # 26
+        'num_layer_encoder': 2,     # 2
+        'num_layer_selector': 3,    # 3
+        'num_layer_predictor': 2,   # 2
         # [Step 3] Initialize network
-        'lr_rate': 0.0001,
-        'keep_prob_s3': 0.5,
-        'mb_size_s3': 32,
-        'iteration_s3': 1000,
-        'check_step_s3': 100,
+        'lr_rate': 0.0001,          # 0.0001
+        'keep_prob_s3': 0.5,        # 0.5
+        'mb_size_s3': 32,           # 32
+        'iteration_s3': 1000,       # 3750
+        'check_step_s3': 100,       # 250
         # [Step 4] Train temporal phenotyping
-        'alpha': 0.00001,
-        'beta': 1,
-        'mb_size_s4': 32,
-        'keep_prob_s4': 0.7,
-        'lr_rate1': 0.0001,
-        'lr_rate2': 0.0001,
+        'alpha': 0.00001,           # 0.00001
+        'beta': 1,                  # 1
+        'mb_size_s4': 32,           # 8
+        'keep_prob_s4': 0.7,        # 0.7
+        'lr_rate1': 0.0001,         # 0.0001
+        'lr_rate2': 0.0001,         # 0.0001
         # [Step 6] Initializing embedding & selector
-        'iteration_s6': 15000,
-        'check_step_s6': 1000,
-        # [Step 7] Training main algorithm"
-        'iteration_s7': 1000,
-        'check_step_s7': 100
+        'iteration_s6': 15000,      # 15000
+        'check_step_s6': 1000,      # 1000
+        # [Step 7] Training main algorithm
+        'iteration_s7': 1000,       # 5000
+        'check_step_s7': 100        # 100
     }
     start_index = get_start_index(main_path, default_start_index)
     for i in range(times):
