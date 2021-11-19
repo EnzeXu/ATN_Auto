@@ -295,7 +295,7 @@ def get_ac_tpc_result(main_path, index):
 
 
 def get_cn_ad_labels(main_path, pt_id_list):
-    clinical_score = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx')
+    clinical_score = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx', engine="openpyxl")
     cn_ad_labels = []
     dic = dict()
     for i in range(320):  # [148*148，[label tuple]，VISCODE，patientID]
