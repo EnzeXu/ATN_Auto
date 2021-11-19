@@ -38,7 +38,7 @@ def purity_score(y_true, y_pred):
 
 
 def build_labels(main_path, patientData4Visits):
-    clinical_score = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx')
+    clinical_score = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx', engine="openpyxl")
     scores = clinical_score.iloc[:, 26:49]  # 21:26
     scores = pd.DataFrame(scores)
     from sklearn.preprocessing import MinMaxScaler
@@ -204,7 +204,7 @@ def get_heat_map_data(K, patient_data, label, data_path):
     for i in range(dim_0):
         for j in range(dim_1):
             patient_data_match.append([patient_data[i][j][3], patient_data[i][j][2]])
-    data = pd.read_excel(data_path) # main_path + 'DPS_ATN/MRI_information_All_Measurement.xlsx'
+    data = pd.read_excel(data_path, engine="openpyxl") # main_path + 'DPS_ATN/MRI_information_All_Measurement.xlsx'
     target_labels = ["MMSE", "CDRSB", "ADAS13"]
     data = data[["PTID", "EXAMDATE"] + target_labels]
     # data["EXAMDATE"] = data["EXAMDATE"].astype(str)
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     # }
     # save_record(main_path, 10, 0, p, "test")
     get_k_means_result(main_path)
-    # data = pd.read_excel("data/MRI_information_All_Measurement.xlsx")
+    # data = pd.read_excel("data/MRI_information_All_Measurement.xlsx", engine="openpyxl")
     # target_labels = ["MMSE", "CDRSB", "ADAS13"]
     # data = data[["PTID", "EXAMDATE"] + target_labels]
     # print(data)
