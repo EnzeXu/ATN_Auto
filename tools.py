@@ -7,7 +7,7 @@ import pandas as pd
 import math
 import time
 import matplotlib.pyplot as plt
-import sys
+import os
 
 
 def f_get_minibatch(mb_size, x, y):
