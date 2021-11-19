@@ -362,7 +362,7 @@ if __name__ == "__main__":
         'iteration_s7': 1000,
         'check_step_s7': 100
     }
-    start_index = 1
+    start_index = get_start_index(main_path)
     for i in range(times):
         j, p, ds = train(main_path, start_index + i, params)
         save_record(main_path, start_index + i, ds, j, p, comments, params)
