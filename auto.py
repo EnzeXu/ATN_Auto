@@ -323,7 +323,7 @@ def train(main_path, data_name, parameters, print_flag=True):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
-    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
     main_path = os.path.dirname(os.path.abspath("auto.py")) + "/"  # "E:/Workspace_WFU/ATN/Auto/"
     if len(sys.argv) > 1:
