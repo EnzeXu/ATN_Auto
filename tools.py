@@ -269,7 +269,7 @@ def save_record(main_path, index, distribution_string, judge, judge_params, comm
 
 
 def get_k_means_result(main_path):
-    df = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx')
+    df = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx', engine="openpyxl")
     print(df)
     atn_kmeans_cluster = np.load(main_path + 'data/atn_kmeans_cluster.npy')
     atn_kmeans_cluster = np.asarray(atn_kmeans_cluster)
