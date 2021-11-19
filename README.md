@@ -41,14 +41,13 @@ $ virtualenv atn_env
 
 # 3 Cloning & Executing Instructions
 ```shell
-$ source ~/atn_env/bin/activate # activate virtual environment
-(atn_env) $ pip list # should be very few packages shown here
+$ source /deac/csc/chenGrp/software/tensorflow/bin/activate # activate virtual environment
 (atn_env) $ cd ~/workspace
 (atn_env) $ git clone https://github.com/EnzeXu/ATN_Auto.git
 (atn_env) $ cd ATN_Auto
 (atn_env) $ tar jxvf data/atn_data_x_n.tar.bz2 -C data # IMPORTANT
 (atn_env) $ pip install -r requirements.txt
-(atn_env) $ python3 auto.py 1 test # python auto.py [times_of_loop] [any_comments]
+(atn_env) $ python auto.py 1 test # python auto.py [times_of_loop] [any_comments]
 # It is normal to see huge warnings at this step, but don't worry.
 # after it finishes (may cost several minutes)
 (atn_env) $ cat record/record.csv
