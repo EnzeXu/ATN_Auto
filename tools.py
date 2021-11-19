@@ -269,6 +269,8 @@ def save_record(main_path, index, distribution_string, judge, judge_params, comm
 
 
 def get_k_means_result(main_path):
+    df = pd.read_excel(main_path + 'data/MRI_information_All_Measurement.xlsx')
+    print(df)
     atn_kmeans_cluster = np.load(main_path + 'data/atn_kmeans_cluster.npy')
     atn_kmeans_cluster = np.asarray(atn_kmeans_cluster)
     enze_patient_data = np.load(main_path + "data/enze_patient_data_n.npy", allow_pickle=True)
@@ -280,7 +282,7 @@ def get_k_means_result(main_path):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
-    main_path = "/".join(sys.argv[0].split("/")[:-1]) + "/"
+    main_path = os.path.dirname(os.path.abspath("__file__")) + "/"
     # p = {
     #     "Cluster_std": 30,
     #     "MMSE_var": 50,
